@@ -1,5 +1,4 @@
-hash_check_enable: md5
-manual_devide: false
-seperate_by_date: true
-seperate_by_suffix: true
-target_folder: /Users/hiuyuting/Code/movefile/save111
+hash_check_enable: ''
+pathTemplate: '{filename}'
+pluginConfig: {}
+target_folder: /Users/hiuyuting/Code/save

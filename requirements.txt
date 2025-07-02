@@ -1,0 +1,16 @@
+# GUI框架
+PySide6>=6.4.0
+
+# 配置文件处理
+PyYAML>=6.0
+
+# 系统和文件操作（标准库，无需安装）
+# os, sys, shutil, tempfile, pathlib
+
+# 其他标准库（无需安装）
+# typing, re, csv, hmac, argparse, hashlib, datetime
+
+# 可选：开发和测试工具
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
