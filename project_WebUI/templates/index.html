@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件分类器 Web UI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>文件分类器</h1>
+            <p>现代化的文件自动分类工具</p>
+        </header>
+
+        <div class="main-content">
+            <!-- 初始化配置对话框 -->
+            <div id="init-config-dialog" class="dialog-overlay" style="display: none;">
+                <div class="dialog">
+                    <h2>🎯 首次配置</h2>
+                    <div class="config-form">
+                        <div class="input-group">
+                            <label>插件目录</label>
+                            <div class="input-with-button">
+                                <input type="text" id="plugins-dir" placeholder="选择插件目录" readonly>
+                                <button type="button" id="browse-plugins" class="btn primary">浏览</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>输出目录</label>
+                            <div class="input-with-button">
+                                <input type="text" id="output-dir" placeholder="选择输出目录" readonly>
+                                <button type="button" id="browse-output" class="btn primary">浏览</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>完整性校验算法</label>
+                            <select id="hash-algorithm">
+                                <option value="">禁用校验</option>
+                                <option value="md5">MD5</option>
+                                <option value="sha1">SHA1</option>
+                                <option value="sha224">SHA224</option>
+                                <option value="sha256">SHA256</option>
+                                <option value="sha384">SHA384</option>
+                                <option value="sha512">SHA512</option>
+                                <option value="sha3_256">SHA3-256</option>
+                                <option value="sha3_512">SHA3-512</option>
+                                <option value="blake2b">BLAKE2b</option>
+                                <option value="blake2s">BLAKE2s</option>
+                            </select>
+                        </div>
+                        <div class="dialog-actions">
+                            <button id="save-config" class="btn primary">保存配置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主界面 -->
+            <div id="main-interface" class="main-interface">
+                <div class="layout">
+                    <!-- 左侧：变量面板 -->
+                    <div class="left-panel">
+                        <div class="panel-header">
+                            <h3>可用变量</h3>
+                            <button id="refresh-variables" class="btn-icon" title="刷新变量列表">刷新</button>
+                        </div>
+                        <div id="variables-panel" class="variables-panel">
+                            <div class="loading-placeholder">加载中...</div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：自上而下布局 -->
+                    <div class="right-panel">
+                        <!-- 输出目录 -->
+                        <div class="output-section">
+                            <div class="panel-header">
+                                <h3>输出目录</h3>
+                                <button id="browse-output-dir" class="btn primary" title="选择输出目录">选择目录</button>
+                            </div>
+                            <div class="output-path" id="output-path">
+                                <span class="path-text">未选择输出目录</span>
+                            </div>
+                        </div>
+
+                        <!-- 模板编辑器与预览合并 -->
+                        <div class="template-section">
+                            <div class="panel-header">
+                                <h3>路径模板与预览</h3>
+                                <div class="template-actions">
+                                    <button id="clear-template" class="btn secondary" title="清空模板">清空</button>
+                                    <button id="save-template" class="btn success" title="保存模板">保存</button>
+                                </div>
+                            </div>
+                            <div class="template-content">
+                                <div id="template-editor" class="template-editor">
+                                    <div class="template-hint">拖拽左侧变量到此处构建路径模板</div>
+                                </div>
+                                <div id="template-preview" class="template-preview">
+                                    <div class="preview-label">路径预览：</div>
+                                    <div id="path-preview" class="path-preview">
+                                        <div class="preview-hint">模板构建完成后这里将显示路径预览</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 文件选择 -->
+                        <div class="file-selection-section">
+                            <div class="panel-header">
+                                <h3>文件选择</h3>
+                                <button id="select-files" class="btn primary">选择文件/目录</button>
+                            </div>
+                            <div id="file-list" class="file-list">
+                                <div class="file-hint">点击"选择文件/目录"开始处理</div>
+                            </div>
+                        </div>
+
+                        <!-- 处理按钮和校验 -->
+                        <div class="process-section">
+                            <div class="process-controls">
+                                <button id="process-files" class="btn success" disabled>处理文件</button>
+                                <div class="hash-validation">
+                                    <div class="hash-status-container">
+                                        <span class="hash-label">完整性校验：</span>
+                                        <span id="hash-status" class="hash-status" title="点击更改">
+                                            <span id="hash-status-text">加载中...</span>
+                                        </span>
+                                        <select id="hash-algorithm-selector" class="hash-selector" style="display: none;">
+                                            <option value="">加载中...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="file-stats" class="file-stats">
+                                <span class="stat-item">总文件数: <span id="total-files">0</span></span>
+                                <span class="stat-item">已处理: <span id="processed-files">0</span></span>
+                            </div>
+                            <div id="progress-panel" class="progress-panel">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <div class="progress-text">准备就绪</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>处理中...</p>
+        </div>
+    </div>
+
+    <!-- 文件选择对话框 -->
+    <div id="file-dialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog">
+            <h2>选择文件</h2>
+            <div class="file-dialog-content">
+                <div class="file-select-methods">
+                    <div class="method-option">
+                        <h3>方法1：使用系统文件浏览器选择</h3>
+                        <div class="input-group">
+                            <label>直接选择文件（推荐）</label>
+                            <button id="browse-system-files" class="btn primary">打开系统文件浏览器</button>
+                        </div>
+                    </div>
+                    <div class="method-divider">或</div>
+                    <div class="method-option">
+                        <h3>方法2：扫描目录获取文件</h3>
+                        <div class="input-group">
+                            <label>选择目录扫描文件</label>
+                            <div class="input-with-button">
+                                <input type="text" id="scan-directory" placeholder="输入目录路径或点击浏览">
+                                <button id="browse-scan-dir" class="btn secondary">浏览</button>
+                            </div>
+                        </div>
+                        <div class="scan-options">
+                            <label>
+                                <input type="checkbox" id="recursive-scan" checked>
+                                递归扫描子目录
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button id="cancel-file-select" class="btn secondary">取消</button>
+                    <button id="confirm-file-select" class="btn primary">开始扫描</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件大小分类插件配置</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>文件大小分类插件</h1>
+            <p class="description">配置文件大小分类的阈值和标签设置</p>
+        </div>
+
+        <div class="config-section">
+            <h2>基本配置</h2>
+            <div class="form-group">
+                <label for="enabled" class="switch-label">
+                    <span>启用插件</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enabled">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="description">描述:</label>
+                <textarea id="description" rows="2" placeholder="插件描述信息"></textarea>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>分类阈值设置</h2>
+            <p class="help-text">设置各个文件大小分类的边界值（单位：字节）</p>
+            
+            <div class="threshold-grid">
+                <div class="threshold-item">
+                    <label for="tiny_threshold">微型文件 (tiny) 上限:</label>
+                    <div class="size-input-group">
+                        <input type="number" id="tiny_threshold" min="1" step="1">
+                        <span class="size-display" id="tiny_display"></span>
+                    </div>
+                    <small class="help-text">小于此大小的文件被归类为微型文件</small>
+                </div>
+
+                <div class="threshold-item">
+                    <label for="small_threshold">小文件 (small) 上限:</label>
+                    <div class="size-input-group">
+                        <input type="number" id="small_threshold" min="1" step="1">
+                        <span class="size-display" id="small_display"></span>
+                    </div>
+                    <small class="help-text">小于此大小的文件被归类为小文件</small>
+                </div>
+
+                <div class="threshold-item">
+                    <label for="medium_threshold">中等文件 (medium) 上限:</label>
+                    <div class="size-input-group">
+                        <input type="number" id="medium_threshold" min="1" step="1">
+                        <span class="size-display" id="medium_display"></span>
+                    </div>
+                    <small class="help-text">小于此大小的文件被归类为中等文件</small>
+                </div>
+
+                <div class="threshold-item">
+                    <label for="large_threshold">大文件 (large) 上限:</label>
+                    <div class="size-input-group">
+                        <input type="number" id="large_threshold" min="1" step="1">
+                        <span class="size-display" id="large_display"></span>
+                    </div>
+                    <small class="help-text">小于此大小的文件被归类为大文件，大于等于此大小的为巨型文件</small>
+                </div>
+            </div>
+
+            <div class="preset-buttons">
+                <button id="preset-default" class="btn btn-outline">默认设置</button>
+                <button id="preset-media" class="btn btn-outline">媒体文件</button>
+                <button id="preset-document" class="btn btn-outline">文档文件</button>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>分类标签</h2>
+            <p class="help-text">自定义各个分类的显示标签</p>
+            
+            <div class="labels-grid">
+                <div class="form-group">
+                    <label for="label_tiny">微型文件标签:</label>
+                    <input type="text" id="label_tiny" placeholder="微型文件">
+                </div>
+                <div class="form-group">
+                    <label for="label_small">小文件标签:</label>
+                    <input type="text" id="label_small" placeholder="小文件">
+                </div>
+                <div class="form-group">
+                    <label for="label_medium">中等文件标签:</label>
+                    <input type="text" id="label_medium" placeholder="中等文件">
+                </div>
+                <div class="form-group">
+                    <label for="label_large">大文件标签:</label>
+                    <input type="text" id="label_large" placeholder="大文件">
+                </div>
+                <div class="form-group">
+                    <label for="label_huge">巨型文件标签:</label>
+                    <input type="text" id="label_huge" placeholder="巨型文件">
+                </div>
+                <div class="form-group">
+                    <label for="label_unknown">未知文件标签:</label>
+                    <input type="text" id="label_unknown" placeholder="未知">
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>文件测试</h2>
+            <div class="form-group">
+                <label for="test_file">测试文件路径:</label>
+                <div class="file-input-group">
+                    <input type="text" id="test_file" placeholder="输入文件路径进行测试">
+                    <button id="test-btn" class="btn btn-secondary">测试</button>
+                </div>
+            </div>
+            
+            <div id="test-result" class="test-result"></div>
+        </div>
+
+        <div class="actions">
+            <button id="save-btn" class="btn btn-primary">保存配置</button>
+            <button id="reset-btn" class="btn btn-secondary">重置</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

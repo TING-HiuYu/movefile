@@ -1,0 +1,7 @@
+manual_grouping:
+  groups:
+  - name: 新分组
+    strategies:
+    - type: contains
+      pattern: '12334123'
+      range_filter: ''

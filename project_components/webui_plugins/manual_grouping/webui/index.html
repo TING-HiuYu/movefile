@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手动分组插件配置</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="plugin-container">
+        <div class="plugin-header">
+            <h2>手动分组配置</h2>
+            <p class="description">支持包含字符串、通配符和正则表达式的文件分组策略</p>
+        </div>
+
+        <div class="plugin-content">
+            <!-- 操作栏 -->
+            <div class="action-bar">
+                <button id="add-group-btn" class="btn primary">新建分组</button>
+                <button id="test-config-btn" class="btn secondary">测试配置</button>
+                <button id="clear-all-btn" class="btn danger">清空全部</button>
+            </div>
+
+            <!-- 说明 -->
+            <div class="info-section">
+                <p><strong>说明：</strong>每个分组内的策略使用AND逻辑（全部匹配），多个分组间使用OR逻辑（任一匹配）</p>
+            </div>
+
+            <!-- 分组列表 -->
+            <div id="groups-container" class="groups-container">
+                <!-- 动态生成的分组配置 -->
+            </div>
+
+            <!-- 测试区域 -->
+            <div id="test-section" class="test-section" style="display: none;">
+                <h3>测试配置</h3>
+                <div class="test-input">
+                    <label>测试文件名（每行一个）：</label>
+                    <textarea id="test-files" placeholder="例如：&#10;IMG_001.jpg&#10;document.pdf&#10;video.mp4&#10;music.mp3"></textarea>
+                    <button id="run-test-btn" class="btn primary">运行测试</button>
+                </div>
+                <div id="test-results" class="test-results"></div>
+            </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="plugin-footer">
+            <button id="save-btn" class="btn primary">保存配置</button>
+            <button id="cancel-btn" class="btn secondary">取消</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

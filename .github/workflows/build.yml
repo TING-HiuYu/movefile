@@ -1,0 +1,183 @@
+name: Multi-platform Cython Build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            executable: file_classifier.exe
+          - os: macos-latest
+            platform: macos
+            arch: x64
+            executable: file_classifier
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            executable: file_classifier
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements_build.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_build.txt
+        
+    - name: Set up MSVC (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v1.3
+      
+    - name: Install build tools (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3-dev
+        
+    - name: Build executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        call build.bat
+      shell: cmd
+      
+    - name: Build executable (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        chmod +x build.sh
+        ./build.sh
+        
+    - name: Test executable
+      run: |
+        python cython_build.py test
+        
+    - name: Get version
+      id: version
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "version=$(python -c "print('v2.0.0')")" >> $GITHUB_OUTPUT
+        else
+          echo "version=$(python -c "print('v2.0.0')")" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+      
+    - name: Create release archive
+      run: |
+        python cython_build.py package
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.platform }}-${{ matrix.arch }}-executable
+        path: |
+          dist/*.zip
+          dist/*.tar.gz
+          dist/${{ matrix.executable }}
+        retention-days: 30
+        
+    - name: Calculate checksums
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        cd dist
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          certutil -hashfile *.zip SHA256 > checksums.txt
+          certutil -hashfile *.exe SHA256 >> checksums.txt
+        else
+          sha256sum * > checksums.txt
+        fi
+      shell: bash
+      
+    - name: Upload checksums
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.platform }}-checksums
+        path: dist/checksums.txt
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+        
+    - name: Prepare release assets
+      run: |
+        mkdir -p release
+        find artifacts -name "*.zip" -o -name "*.tar.gz" | xargs -I {} cp {} release/
+        find artifacts -name "checksums.txt" | xargs -I {} cp {} release/checksums-$(basename $(dirname {})).txt
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        name: File Classifier ${{ github.ref_name }}
+        body: |
+          ## 文件分类器 ${{ github.ref_name }}
+          
+          ### 下载说明
+          - **Windows**: 下载 `file_classifier-*-windows-x64.zip`
+          - **macOS**: 下载 `file_classifier-*-macos-x64.tar.gz`
+          - **Linux**: 下载 `file_classifier-*-linux-x64.tar.gz`
+          
+          ### 安装和使用
+          1. 下载对应平台的压缩包
+          2. 解压到任意目录
+          3. 运行可执行文件
+          
+          ### 校验文件完整性
+          使用提供的校验和文件验证下载的文件：
+          ```bash
+          # Linux/macOS
+          sha256sum -c checksums-*.txt
+          
+          # Windows PowerShell
+          Get-FileHash *.zip | Format-List
+          ```
+          
+          ### 系统要求
+          - **Windows**: Windows 10 或更高版本
+          - **macOS**: macOS 10.14 或更高版本
+          - **Linux**: 64位 Linux发行版
+          
+          ### 更新日志
+          请查看项目README获取完整的更新日志。
+          
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

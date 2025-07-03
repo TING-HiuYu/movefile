@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件日期读取插件配置</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>文件日期读取插件</h1>
+            <p class="description">配置文件日期提取的行为和格式设置</p>
+        </div>
+
+        <div class="config-section">
+            <h2>基本配置</h2>
+            <div class="form-group">
+                <label for="enabled" class="switch-label">
+                    <span>启用插件</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enabled">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="fallback_to_mtime" class="switch-label">
+                    <span>EXIF失败时使用文件修改时间</span>
+                    <label class="switch">
+                        <input type="checkbox" id="fallback_to_mtime">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="date_format">日期格式:</label>
+                <input type="text" id="date_format" placeholder="%Y-%m-%d">
+                <small class="help-text">
+                    使用Python日期格式字符串，如：%Y-%m-%d (2024-01-15)、%Y/%m/%d (2024/01/15)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="description">描述:</label>
+                <textarea id="description" rows="2" placeholder="插件描述信息"></textarea>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>文件测试</h2>
+            <div class="form-group">
+                <label for="test_file">测试文件路径:</label>
+                <div class="file-input-group">
+                    <input type="text" id="test_file" placeholder="输入文件路径进行测试">
+                    <button id="test-btn" class="btn btn-secondary">测试</button>
+                </div>
+            </div>
+            
+            <div id="test-result" class="test-result"></div>
+        </div>
+
+        <div class="actions">
+            <button id="save-btn" class="btn btn-primary">保存配置</button>
+            <button id="reset-btn" class="btn btn-secondary">重置</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
